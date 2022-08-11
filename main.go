@@ -34,10 +34,10 @@ func main() {
 	updated := false
 	cacheFile := CacheFile{}
 	bytes, err := io.ReadAll(f)
+	if err != nil {
+		log.Fatalf("file read failed: %s", err)
+	}
 	if len(bytes) > 0 {
-		if err != nil {
-			log.Fatalf("file read failed: %s", err)
-		}
 		if err := json.Unmarshal(bytes, &cacheFile); err != nil {
 			log.Fatalf("json.Unmarshal() failed(read cache file): %s", err)
 		}
