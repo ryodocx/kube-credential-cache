@@ -28,5 +28,5 @@ changelog:
       - '^docs:'
       - '^test:'
 release:
-  draft: false
+  draft: true
   prerelease: auto
