@@ -12,7 +12,45 @@ import (
 	"time"
 )
 
+// https://kubernetes.io/docs/reference/config-api/client-authentication.v1
+type ClientAuthentication struct {
+	APIVersion string   `json:"apiVersion"`
+	Kind       string   `json:"kind"`
+	Spec       struct{} `json:"spec"`
+	Status     struct {
+		ExpirationTimestamp time.Time `json:"expirationTimestamp"`
+		Token               string    `json:"token"`
+	} `json:"status"`
+}
+
+type CacheFile struct {
+	Tokens map[string]ClientAuthentication `json:"tokens"`
+}
+
 func main() {
+	// configuration
+	var (
+		cacheFilepath string
+		refreshMargin time.Duration = time.Second * 30
+	)
+	if e := os.Getenv("K8S_TOKEN_CACHE_FILE"); e != "" {
+		cacheFilepath = e
+	} else {
+		cacheDir, err := os.UserCacheDir()
+		if err != nil {
+			log.Fatalf("can't find CacheDir. fix error or set 'K8S_TOKEN_CACHE_FILE': %s", err)
+		}
+		cacheFilepath = path.Join(cacheDir, "k8s-token-cache/token.json")
+		// mac: /Users/${USER}/Library/Caches/k8s-token-cache/token.json
+	}
+	if e := os.Getenv("K8S_TOKEN_CACHE_REFRESH_MARGIN"); e != "" {
+		d, err := time.ParseDuration(e)
+		if err != nil {
+			log.Fatalf("invalid environment variable 'K8S_TOKEN_CACHE_REFRESH_MARGIN': %s", err.Error())
+		}
+		refreshMargin = d
+	}
+
 	// open file
 	f, err := os.OpenFile(cacheFilepath, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
