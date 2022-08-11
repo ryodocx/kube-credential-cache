@@ -1,1 +1,1 @@
-# eks-token-cache
+# k8s-token-cache
