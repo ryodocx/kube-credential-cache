@@ -3,17 +3,25 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"time"
 )
 
 var (
-	cacheFile     string        = "~/.kube/cache/token.json"
+	cacheFilepath string
 	refreshMargin time.Duration = time.Second * 30
 )
 
 func init() {
 	if e := os.Getenv("EKS_TOKEN_CACHE_FILE"); e != "" {
-		cacheFile = e
+		cacheFilepath = e
+	} else {
+		cacheDir, err := os.UserCacheDir()
+		if err != nil {
+			log.Fatalf("can't find CacheDir. fix error or set 'EKS_TOKEN_CACHE_FILE': %s", err)
+		}
+		cacheFilepath = path.Join(cacheDir, "k8s-token-cache/token.json")
+		// mac: /Users/${USER}/Library/Caches/k8s-token-cache/token.json
 	}
 
 	if e := os.Getenv("EKS_TOKEN_CACHE_REFRESH_MARGIN"); e != "" {

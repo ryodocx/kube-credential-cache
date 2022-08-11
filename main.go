@@ -14,13 +14,13 @@ import (
 
 func main() {
 	// open file
-	f, err := os.OpenFile(cacheFile, os.O_RDWR|os.O_CREATE, 0600)
+	f, err := os.OpenFile(cacheFilepath, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err := os.MkdirAll(path.Dir(cacheFile), 0700); err != nil {
+			if err := os.MkdirAll(path.Dir(cacheFilepath), 0700); err != nil {
 				log.Fatalf("mkdir failed: %s", err)
 			}
-			f, err = os.OpenFile(cacheFile, os.O_RDWR|os.O_CREATE, 0600)
+			f, err = os.OpenFile(cacheFilepath, os.O_RDWR|os.O_CREATE, 0600)
 			if err != nil {
 				log.Fatalf("file open failed(after mkdir): %s", err)
 			}
