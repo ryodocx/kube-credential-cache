@@ -73,6 +73,7 @@ func main() {
 			log.Fatalf("not enough command at args")
 		}
 		cmd := exec.Command(os.Args[1], os.Args[2:]...)
+		cmd.Env = os.Environ()
 		bytes, err := cmd.CombinedOutput()
 
 		if err != nil {
