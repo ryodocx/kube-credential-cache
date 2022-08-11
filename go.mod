@@ -1,3 +1,3 @@
-module github.com/ryodocx/eks-token-cache
+module github.com/ryodocx/k8s-token-cache
 
 go 1.19
