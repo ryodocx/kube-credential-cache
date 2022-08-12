@@ -111,15 +111,16 @@ func main() {
 			log.Fatalf("not enough command at args")
 		}
 		cmd := exec.Command(os.Args[1], os.Args[2:]...)
+		cmd.Stderr = os.Stderr
 		cmd.Env = os.Environ()
-		bytes, err := cmd.CombinedOutput()
+		bytes, err := cmd.Output()
 
 		if err != nil {
 			log.Fatalf("read command output failed: %s\noutput: %s", err, string(bytes))
 		}
 
 		if err := json.Unmarshal(bytes, &tmpCache); err != nil {
-			log.Fatalf("json.Unmarshal() failed(read command output): %s", err)
+			log.Fatalf("json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
 		}
 
 		if time.Until(tmpCache.Status.ExpirationTimestamp) < refreshMargin {
