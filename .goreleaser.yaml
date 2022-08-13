@@ -4,7 +4,9 @@ before:
   hooks:
     - go mod tidy
 builds:
-  - binary: kcc-cache
+  - &build
+    id: kcc-cache
+    binary: kcc-cache
     main: ./cmd/kcc-cache
     env:
       - CGO_ENABLED=0
@@ -12,6 +14,10 @@ builds:
       - linux
       - windows
       - darwin
+  - <<: *build
+    id: kcc-injector
+    binary: kcc-injector
+    main: ./cmd/kcc-injector
 archives:
   - replacements:
       darwin: Darwin
