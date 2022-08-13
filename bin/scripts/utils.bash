@@ -2,12 +2,12 @@
 
 set -euo pipefail
 
-GH_REPO="https://github.com/sachaos/viddy"
-TOOL_NAME="viddy"
-TOOL_TEST="viddy --version"
+GH_REPO="https://github.com/ryodocx/kube-credential-cache"
+TOOL_NAME="kcc-cache"
+TOOL_TEST="which kcc-cache"
 
 fail() {
-  echo -e "asdf-$TOOL_NAME: $*"
+  echo -e "asdf-kcc: $*"
   exit 1
 }
 
