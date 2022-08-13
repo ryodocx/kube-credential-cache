@@ -30,7 +30,3 @@ jobs:
 
       - name: List file to shfmt
         run: shfmt -f .
-
-      - name: Run shfmt
-        run: bin/scripts/shfmt.bash
-
