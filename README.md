@@ -106,7 +106,19 @@ kubeconfig specification
 
 ## Configration
 
+### kcc-cache
+
 | Environment variable                 | default                                                                                                                                                                                                                                        | description                  |
 |--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
 | KUBE_CREDENTIAL_CACHE_FILE           | macOS:</br>`~/Library/Caches/kube-credential-cache/cache.json`</br>Linux:</br>`$XDG_CACHE_HOME/kube-credential-cache/cache.json`</br>`~/.cache/kube-credential-cache/cache.json`</br>Windows:</br>`%AppData%\kube-credential-cache\cache.json` | path of Cache file           |
 | KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN | `30s`                                                                                                                                                                                                                                          | margin of credential refresh |
+
+### kcc-injector
+
+```sh
+$ kcc-injector -h
+Usage: kcc-injector [flags] <kubeconfig filepath>
+  -c string
+        injection command (default "kcc-cache")
+  -i    edit file in-place
+```
