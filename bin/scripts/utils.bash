@@ -60,7 +60,7 @@ install_version() {
     local tool_cmd="kcc-cache"
     test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
     local tool_cmd2="kcc-injector"
-    test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd2 to be executable."
+    test -x "$install_path/bin/$tool_cmd2" || fail "Expected $install_path/bin/$tool_cmd2 to be executable."
 
     echo "$TOOL_NAME $version installation was successful!"
   ) || (
