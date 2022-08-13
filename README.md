@@ -18,7 +18,7 @@ Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/c
 - Cache file
   - [ ] Encryption
 - kubeconfig
-  - [ ] kubeconfig optimizer (inject cache command automatically)
+  - [x] kubeconfig optimizer (inject cache command automatically)
 
 ## Effects
 A one of notable effect is, when used [`aws eks update-kubeconfig`](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html) to access EKS. about 500ms faster!
