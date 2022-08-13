@@ -1,0 +1,3 @@
+.tmp/
+kubeconfig.yaml
+kcc-cache

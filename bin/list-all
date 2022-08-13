@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+plugin_dir=$(dirname "$(dirname "${BASH_SOURCE[0]}")")
+source "${plugin_dir}/bin/scripts/utils.bash"
+
+list_all_versions | sort_versions | xargs echo

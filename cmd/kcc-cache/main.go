@@ -18,8 +18,10 @@ type ClientAuthentication struct {
 	Kind       string   `json:"kind"`
 	Spec       struct{} `json:"spec"`
 	Status     struct {
-		ExpirationTimestamp time.Time `json:"expirationTimestamp"`
-		Token               string    `json:"token"`
+		ExpirationTimestamp   time.Time `json:"expirationTimestamp"`
+		Token                 string    `json:"token,omitempty"`
+		ClientCertificateData string    `json:"clientCertificateData,omitempty"`
+		ClientKeyData         string    `json:"clientKeyData,omitempty"`
 	} `json:"status"`
 }
 
@@ -33,20 +35,19 @@ func main() {
 		cacheFilepath string
 		refreshMargin time.Duration = time.Second * 30
 	)
-	if e := os.Getenv("K8S_TOKEN_CACHE_FILE"); e != "" {
+	if e := os.Getenv("KUBE_CREDENTIAL_CACHE_FILE"); e != "" {
 		cacheFilepath = e
 	} else {
 		cacheDir, err := os.UserCacheDir()
 		if err != nil {
-			log.Fatalf("can't find CacheDir. fix error or set 'K8S_TOKEN_CACHE_FILE': %s", err)
+			log.Fatalf("can't find CacheDir. fix error or set 'KUBE_CREDENTIAL_CACHE_FILE': %s", err)
 		}
-		cacheFilepath = path.Join(cacheDir, "k8s-token-cache/token.json")
-		// mac: /Users/${USER}/Library/Caches/k8s-token-cache/token.json
+		cacheFilepath = path.Join(cacheDir, "kube-credential-cache", "cache.json")
 	}
-	if e := os.Getenv("K8S_TOKEN_CACHE_REFRESH_MARGIN"); e != "" {
+	if e := os.Getenv("KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN"); e != "" {
 		d, err := time.ParseDuration(e)
 		if err != nil {
-			log.Fatalf("invalid environment variable 'K8S_TOKEN_CACHE_REFRESH_MARGIN': %s", err.Error())
+			log.Fatalf("invalid environment variable 'KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN': %s", err.Error())
 		}
 		refreshMargin = d
 	}
@@ -111,15 +112,16 @@ func main() {
 			log.Fatalf("not enough command at args")
 		}
 		cmd := exec.Command(os.Args[1], os.Args[2:]...)
+		cmd.Stderr = os.Stderr
 		cmd.Env = os.Environ()
-		bytes, err := cmd.CombinedOutput()
+		bytes, err := cmd.Output()
 
 		if err != nil {
 			log.Fatalf("read command output failed: %s\noutput: %s", err, string(bytes))
 		}
 
 		if err := json.Unmarshal(bytes, &tmpCache); err != nil {
-			log.Fatalf("json.Unmarshal() failed(read command output): %s", err)
+			log.Fatalf("json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
 		}
 
 		if time.Until(tmpCache.Status.ExpirationTimestamp) < refreshMargin {
