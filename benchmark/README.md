@@ -21,7 +21,7 @@ export AWS_PROFILE_EKS=<your AWS_PROFILE to access EKS>
 # run benchmark
 make bench
 
-# teadown
+# teardown
 make reset
 ```
 
