@@ -1,122 +1,103 @@
 package benchmark
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"testing"
 )
 
-func BenchmarkKubectlFast(b *testing.B) {
-	run := func() {
-		_, err := exec.Command(
-			"kubectl",
-			"version",
-			"--user",
-			"kind-kcc-bench",
-		).Output()
-		if err != nil {
-			b.Error(err)
-		}
-	}
-
-	run()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		run()
-	}
+// EKS
+var eksKubectx string = os.Getenv("KUBECONTEXT_EKS")
+var eksEnv map[string]string = map[string]string{
+	"AWS_PROFILE": os.Getenv("AWS_PROFILE_EKS"),
+	"KUBECONFIG":  os.Getenv("KUBECONFIG_EKS"),
 }
+
+func BenchmarkKubectlEKS(b *testing.B) {
+	common(b, []string{
+		"kubectl",
+		"--context",
+		eksKubectx,
+		"version",
+	}, eksEnv)
+}
+
+func BenchmarkGetCredentialEKS(b *testing.B) {
+	common(b, []string{
+		"aws",
+		"eks",
+		"get-token",
+		"--cluster-name",
+		"example", // eks get-token は署名付きURLを生成しているのみなので、通信をせず任意のcluste-nameで動作する
+	}, eksEnv)
+}
+
+// no wait
+
+func BenchmarkKubectlNoWait(b *testing.B) {
+	common(b, []string{
+		"kubectl",
+		"version",
+		"--user",
+		"kind-kcc-bench",
+	})
+}
+
+// get-credential-wait.sh with cache
 
 func BenchmarkKubectlCache(b *testing.B) {
-	run := func() {
-		_, err := exec.Command(
-			"kubectl",
-			"version",
-			"--user",
-			"cache",
-		).Output()
-		if err != nil {
-			b.Error(err)
-		}
-	}
-
-	run()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		run()
-	}
+	common(b, []string{
+		"kubectl",
+		"version",
+		"--user",
+		"cache",
+	})
 }
+
+func BenchmarkGetCredentialCache(b *testing.B) {
+	common(b, []string{
+		"kcc-cache",
+		"sh",
+		"get-credential-wait.sh",
+	})
+}
+
+// get-credential-wait.sh only
 
 func BenchmarkKubectlSlow(b *testing.B) {
-	run := func() {
-		_, err := exec.Command(
-			"kubectl",
-			"version",
-			"--user",
-			"slow",
-		).Output()
-		if err != nil {
-			b.Error(err)
-		}
-	}
-
-	run()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		run()
-	}
+	common(b, []string{
+		"kubectl",
+		"version",
+		"--user",
+		"slow",
+	})
 }
 
-func BenchmarkGetTokenCache(b *testing.B) {
-	run := func() {
-		_, err := exec.Command(
-			"kcc-cache",
-			"sh",
-			"get-token-wait.sh",
-		).Output()
-		if err != nil {
-			b.Error(err)
-		}
-	}
-
-	run()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		run()
-	}
+func BenchmarkGetCredentialSlow(b *testing.B) {
+	common(b, []string{
+		"sh",
+		"get-credential-wait.sh",
+	})
 }
 
-func BenchmarkGetTokenOriginal(b *testing.B) {
+// common
+func common(b *testing.B, cmds []string, env ...map[string]string) {
 	run := func() {
-		_, err := exec.Command(
-			"sh",
-			"get-token-wait.sh",
-		).Output()
+		cmd := exec.Command(cmds[0], cmds[1:]...)
+		cmd.Env = os.Environ()
+		if len(env) == 1 {
+			for k, v := range env[0] {
+				cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
+			}
+		}
+		_, err := cmd.Output()
 		if err != nil {
 			b.Error(err)
 		}
 	}
 
-	run()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		run()
-	}
-}
-
-func BenchmarkGetTokenEKS(b *testing.B) {
-	run := func() {
-		_, err := exec.Command(
-			"aws",
-			"eks",
-			"get-token",
-			"--cluster-name",
-			"example",
-		).Output()
-		if err != nil {
-			b.Error(err)
-		}
-	}
-
-	run()
+	run() // warmup
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		run()

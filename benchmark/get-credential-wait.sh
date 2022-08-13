@@ -1,6 +1,9 @@
 #!/bin/sh
 
-sleep 0.23
+# aws eks get-token と大体合わせる
+sleep 0.22
+
+# return valid credential
 cat <<EOS
 {
   "kind": "ExecCredential",
