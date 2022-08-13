@@ -1,4 +1,4 @@
-# k8s-token-cache
+# kcc: kube-credential-cache
 Faster access to kubernetes!
 especially, for kubectl + EKS
 
@@ -21,15 +21,15 @@ A one of notable effect is, when used [`aws eks update-kubeconfig`](https://docs
 ## Installation
 
 ```sh
-go install github.com/ryodocx/k8s-token-cache@latest
+go install github.com/ryodocx/kube-credential-cache@latest
 ```
 
 ## Usage
 
 * edit your kubeconfig
-  * set `k8s-token-cache` to command
+  * set `kcc-cache` to command
   * original command move to args
-  * **remove env** because k8s-token-cache only uses args for cache key
+  * **remove env** because `kcc-cache` only uses args for cache key
 
 EKS
 
@@ -46,7 +46,7 @@ users:
       exec:
         apiVersion: client.authentication.k8s.io/v1beta1
 -       command: aws
-+       command: k8s-token-cache
++       command: kcc-cache
         args:
 +         - aws
           - --region
@@ -59,7 +59,7 @@ users:
 +         - <your-profile>
 -       env:
 -         - name: AWS_PROFILE
--           value: <your-profile> 
+-           value: <your-profile>
 ```
 
 EKS with [aws-vault](https://github.com/99designs/aws-vault)
@@ -77,7 +77,7 @@ users:
       exec:
         apiVersion: client.authentication.k8s.io/v1beta1
 -       command: aws
-+       command: k8s-token-cache
++       command: kcc-cache
         args:
 +         - aws-vault
 +         - exec
@@ -101,7 +101,7 @@ kubeconfig specification
 
 ## Configration
 
-| Environment variable           | default                                                                                                                                                                                                                | description                  |
-|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
-| K8S_TOKEN_CACHE_FILE           | macOS:</br>`~/Library/Caches/k8s-token-cache/token.json`</br>Linux:</br>`$XDG_CACHE_HOME/k8s-token-cache/token.json`</br>`~/.cache/k8s-token-cache/token.json`</br>Windows:</br>`%AppData%\k8s-token-cache\token.json` | path of Cache file           |
-| K8S_TOKEN_CACHE_REFRESH_MARGIN | `30s`                                                                                                                                                                                                                  | margin of credential refresh |
+| Environment variable                 | default                                                                                                                                                                                                                                        | description                  |
+|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| KUBE_CREDENTIAL_CACHE_FILE           | macOS:</br>`~/Library/Caches/kube-credential-cache/cache.json`</br>Linux:</br>`$XDG_CACHE_HOME/kube-credential-cache/cache.json`</br>`~/.cache/kube-credential-cache/cache.json`</br>Windows:</br>`%AppData%\kube-credential-cache\cache.json` | path of Cache file           |
+| KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN | `30s`                                                                                                                                                                                                                                          | margin of credential refresh |
