@@ -10,6 +10,7 @@ import (
 
 // EKS
 var eksKubectx string = os.Getenv("KUBECONTEXT_EKS")
+var eksKubectxCache string = os.Getenv("KUBECONTEXT_EKS_CACHE")
 var eksEnv map[string]string = map[string]string{
 	"AWS_PROFILE": os.Getenv("AWS_PROFILE_EKS"),
 	"KUBECONFIG":  os.Getenv("KUBECONFIG_EKS"),
@@ -24,8 +25,28 @@ func BenchmarkKubectlEKS(b *testing.B) {
 	}, eksEnv)
 }
 
+func BenchmarkKubectlEKSCache(b *testing.B) {
+	common(b, []string{
+		"kubectl",
+		"--context",
+		eksKubectxCache,
+		"version",
+	}, eksEnv)
+}
+
 func BenchmarkGetCredentialEKS(b *testing.B) {
 	common(b, []string{
+		"aws",
+		"eks",
+		"get-token",
+		"--cluster-name",
+		"example", // eks get-token は署名付きURLを生成しているのみなので、通信をせず任意のcluste-nameで動作する
+	}, eksEnv)
+}
+
+func BenchmarkGetCredentialEKSCache(b *testing.B) {
+	common(b, []string{
+		"kcc-cache",
 		"aws",
 		"eks",
 		"get-token",
