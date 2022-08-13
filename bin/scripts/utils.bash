@@ -4,7 +4,6 @@ set -euo pipefail
 
 GH_REPO="https://github.com/ryodocx/kube-credential-cache"
 TOOL_NAME="kube-credential-cache"
-TOOL_TEST="kcc-injector -h"
 
 fail() {
   echo -e "asdf-$TOOL_NAME: $*"
