@@ -24,11 +24,14 @@ benchmark is [here](./benchmark/)
 
 ```sh
 go install github.com/ryodocx/kube-credential-cache/cmd/kcc-cache@latest
+go install github.com/ryodocx/kube-credential-cache/cmd/kcc-injector@latest
 ```
 
 ## Usage
 
-* edit your kubeconfig
+install & just run `kcc-injector -i <your kubeconfig>`
+
+if manually edit kubeconfig,
   * set `kcc-cache` to command
   * original command move to args
   * **remove env** because `kcc-cache` only uses args for cache key
