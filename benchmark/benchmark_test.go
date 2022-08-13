@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 )
 
 // EKS
@@ -98,6 +99,7 @@ func common(b *testing.B, cmds []string, env ...map[string]string) {
 	}
 
 	run() // warmup
+	time.Sleep(time.Second * 1)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		run()
