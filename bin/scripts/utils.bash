@@ -3,11 +3,11 @@
 set -euo pipefail
 
 GH_REPO="https://github.com/ryodocx/kube-credential-cache"
-TOOL_NAME="kcc-cache"
-TOOL_TEST="which kcc-cache"
+TOOL_NAME="kube-credential-cache"
+TOOL_TEST="kcc-injector -h"
 
 fail() {
-  echo -e "asdf-kcc: $*"
+  echo -e "asdf-$TOOL_NAME: $*"
   exit 1
 }
 
@@ -37,7 +37,7 @@ download_release() {
   version="$1"
   filename="$2"
 
-  url="$GH_REPO/releases/download/v${version}/viddy_${version}_$(uname -s)_x86_64.tar.gz"
+  url="$GH_REPO/releases/download/v${version}/kube-credential-cache_${version}_$(uname -s)_$(uname -m).tar.gz"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
@@ -54,11 +54,13 @@ install_version() {
 
   (
     mkdir -p "$install_path/bin"
-    cp "$ASDF_DOWNLOAD_PATH/$TOOL_NAME" "$install_path/bin/"
+    cp "$ASDF_DOWNLOAD_PATH/kcc-cache" "$install_path/bin/"
+    cp "$ASDF_DOWNLOAD_PATH/kcc-injector" "$install_path/bin/"
 
-    local tool_cmd
-    tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
+    local tool_cmd="kcc-cache"
     test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd to be executable."
+    local tool_cmd2="kcc-injector"
+    test -x "$install_path/bin/$tool_cmd" || fail "Expected $install_path/bin/$tool_cmd2 to be executable."
 
     echo "$TOOL_NAME $version installation was successful!"
   ) || (
