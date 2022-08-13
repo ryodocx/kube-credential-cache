@@ -2,7 +2,8 @@ export KUBECONFIG = kubeconfig.yaml
 export KUBE_CREDENTIAL_CACHE_FILE := .tmp/cache.json
 
 bench: setup
-	rm -f .tmp/cache.json
+	@rm -f .tmp/cache.json
+	kubectl version --short 2>/dev/null
 	go test -bench . -cpu 1 -benchtime 10s
 
 setup: .tmp/check ${KUBECONFIG} kcc-cache
