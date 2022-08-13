@@ -27,7 +27,7 @@ reset:
 kind-create: ${KUBECONFIG}
 ${KUBECONFIG}: kind.yaml
 	kind create cluster --config kind.yaml
-	cat slowuser.yaml >> ${KUBECONFIG}
+	cat additional_kubeconfig.yaml >> ${KUBECONFIG}
 
 kcc-cache:
 	go build -o $@ ../cmd/kcc-cache/
