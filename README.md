@@ -23,7 +23,7 @@ benchmark is [here](./benchmark/)
 ## Installation
 
 ```sh
-go install github.com/ryodocx/kube-credential-cache@latest
+go install github.com/ryodocx/kube-credential-cache/cmd/kcc-cache@latest
 ```
 
 ## Usage
