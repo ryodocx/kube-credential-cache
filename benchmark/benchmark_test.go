@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func BenchmarkKubectlDirect(b *testing.B) {
+func BenchmarkKubectlFast(b *testing.B) {
 	run := func() {
 		_, err := exec.Command(
 			"kubectl",
@@ -70,7 +70,7 @@ func BenchmarkGetTokenCache(b *testing.B) {
 		_, err := exec.Command(
 			"kcc-cache",
 			"sh",
-			"get-token.sh",
+			"get-token-wait.sh",
 		).Output()
 		if err != nil {
 			b.Error(err)
@@ -84,11 +84,32 @@ func BenchmarkGetTokenCache(b *testing.B) {
 	}
 }
 
-func BenchmarkGetToken(b *testing.B) {
+func BenchmarkGetTokenOriginal(b *testing.B) {
 	run := func() {
 		_, err := exec.Command(
 			"sh",
-			"get-token.sh",
+			"get-token-wait.sh",
+		).Output()
+		if err != nil {
+			b.Error(err)
+		}
+	}
+
+	run()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		run()
+	}
+}
+
+func BenchmarkGetTokenEKS(b *testing.B) {
+	run := func() {
+		_, err := exec.Command(
+			"aws",
+			"eks",
+			"get-token",
+			"--cluster-name",
+			"example",
 		).Output()
 		if err != nil {
 			b.Error(err)

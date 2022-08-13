@@ -1,16 +1,16 @@
 export KUBECONFIG = kubeconfig.yaml
-export KUBE_CREDENTIAL_CACHE_FILE := .make/cache.json
+export KUBE_CREDENTIAL_CACHE_FILE := .tmp/cache.json
 
-default: .make/check kubeconfig.yaml
+default: .tmp/check kubeconfig.yaml
 	@echo completed
 
 reset:
 	kind delete cluster --name kcc-bench || true
 	rm ${KUBECONFIG} || true
-	rm -rf .make
+	rm -rf .tmp
 	make default
 
-.make/check: .make/mkdir
+.tmp/check: .tmp/mkdir
 	docker version --format '{{.Server.Version}}'
 	kind version -q
 	kubectl version --client --short
@@ -18,10 +18,11 @@ reset:
 	yj -v
 	gdate
 	gsed --version
+	aws --version
 	touch $@
 
-.make/mkdir:
-	mkdir -p .make
+.tmp/mkdir:
+	mkdir -p .tmp
 	touch $@
 
 kind-create: ${KUBECONFIG}
@@ -33,5 +34,5 @@ kcc-cache:
 	go build -o $@ ../cmd/kcc-cache/
 
 bench: default kcc-cache
-	rm -f .make/cache.json
+	rm -f .tmp/cache.json
 	go test -bench . -cpu 1 -benchtime 10s

@@ -16,7 +16,9 @@ Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/c
 ## Effects
 A one of notable effect is, when used [`aws eks update-kubeconfig`](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html) to access EKS. about 500ms faster!
 
-<!-- TODO: graph -->
+![](./benchmark/graph_eks.svg)
+
+benchmark is [here](./benchmark/)
 
 ## Installation
 

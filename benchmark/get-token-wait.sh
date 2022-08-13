@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sleep 0.3
+sleep 0.23
 cat <<EOS
 {
   "kind": "ExecCredential",
