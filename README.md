@@ -30,8 +30,12 @@ benchmark is [here](./benchmark/)
 ## Installation
 
 ```sh
+# go install
 go install github.com/ryodocx/kube-credential-cache/cmd/kcc-cache@latest
 go install github.com/ryodocx/kube-credential-cache/cmd/kcc-injector@latest
+
+# asdf-vm
+asdf plugin add kube-credential-cache https://github.com/ryodocx/kube-credential-cache
 ```
 
 ## Usage
