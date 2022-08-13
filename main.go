@@ -18,8 +18,10 @@ type ClientAuthentication struct {
 	Kind       string   `json:"kind"`
 	Spec       struct{} `json:"spec"`
 	Status     struct {
-		ExpirationTimestamp time.Time `json:"expirationTimestamp"`
-		Token               string    `json:"token"`
+		ExpirationTimestamp   time.Time `json:"expirationTimestamp"`
+		Token                 string    `json:"token,omitempty"`
+		ClientCertificateData string    `json:"clientCertificateData,omitempty"`
+		ClientKeyData         string    `json:"clientKeyData,omitempty"`
 	} `json:"status"`
 }
 
