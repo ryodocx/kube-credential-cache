@@ -41,14 +41,14 @@ func main() {
 	} else {
 		cacheDir, err := os.UserCacheDir()
 		if err != nil {
-			log.Fatalf("can't find CacheDir. fix error or set 'KUBE_CREDENTIAL_CACHE_FILE': %s", err)
+			log.Fatalf(os.Args[0]+": can't find CacheDir. fix error or set 'KUBE_CREDENTIAL_CACHE_FILE': %s", err)
 		}
 		cacheFilepath = path.Join(cacheDir, "kube-credential-cache", "cache.json")
 	}
 	if e := os.Getenv("KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN"); e != "" {
 		d, err := time.ParseDuration(e)
 		if err != nil {
-			log.Fatalf("invalid environment variable 'KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN': %s", err.Error())
+			log.Fatalf(os.Args[0]+": invalid environment variable 'KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN': %s", err.Error())
 		}
 		refreshMargin = d
 	}
@@ -77,14 +77,14 @@ func main() {
 	if err != nil {
 		if os.IsNotExist(err) {
 			if err := os.MkdirAll(path.Dir(cacheFilepath), 0700); err != nil {
-				log.Fatalf("mkdir failed: %s", err)
+				log.Fatalf(os.Args[0]+": mkdir failed: %s", err)
 			}
 			f, err = os.OpenFile(cacheFilepath, os.O_RDWR|os.O_CREATE, 0600)
 			if err != nil {
-				log.Fatalf("file open failed(after mkdir): %s", err)
+				log.Fatalf(os.Args[0]+": file open failed(after mkdir): %s", err)
 			}
 		} else {
-			log.Fatalf("file open failed: %s", err)
+			log.Fatalf(os.Args[0]+": file open failed: %s", err)
 		}
 	}
 	defer f.Close()
@@ -94,11 +94,11 @@ func main() {
 	cacheFile := CacheFile{}
 	bytes, err := io.ReadAll(f)
 	if err != nil {
-		log.Fatalf("file read failed: %s", err)
+		log.Fatalf(os.Args[0]+": file read failed: %s", err)
 	}
 	if len(bytes) > 0 {
 		if err := json.Unmarshal(bytes, &cacheFile); err != nil {
-			log.Fatalf("json.Unmarshal() failed(read cache file): %s", err)
+			log.Fatalf(os.Args[0]+": json.Unmarshal() failed(read cache file): %s", err)
 		}
 	}
 	defer func() {
@@ -129,7 +129,7 @@ func main() {
 		tmpCache := ClientAuthentication{}
 
 		if len(os.Args) < 2 {
-			log.Fatalf("not enough command at args")
+			log.Fatalf(os.Args[0] + ": not enough command at args")
 		}
 		cmd := exec.Command(os.Args[1], os.Args[2:]...)
 		cmd.Stderr = os.Stderr
@@ -137,15 +137,15 @@ func main() {
 		bytes, err := cmd.Output()
 
 		if err != nil {
-			log.Fatalf("read command output failed: %s\noutput: %s", err, string(bytes))
+			log.Fatalf(os.Args[0]+": read command output failed: %s\noutput: %s", err, string(bytes))
 		}
 
 		if err := json.Unmarshal(bytes, &tmpCache); err != nil {
-			log.Fatalf("json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
+			log.Fatalf(os.Args[0]+": json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
 		}
 
 		if time.Until(tmpCache.Status.ExpirationTimestamp) < refreshMargin {
-			log.Fatalf("Obtained token has expired: %s", string(bytes))
+			log.Fatalf(os.Args[0]+": Obtained token has expired: %s", string(bytes))
 		}
 
 		cacheFile.Credentials[cacheKey] = tmpCache
@@ -155,7 +155,7 @@ func main() {
 	// print
 	output, err := json.Marshal(cacheFile.Credentials[cacheKey])
 	if err != nil {
-		log.Fatalf("json.Marshal() failed: %s", err)
+		log.Fatalf(os.Args[0]+": json.Marshal() failed: %s", err)
 	}
 	fmt.Println(string(output))
 }
