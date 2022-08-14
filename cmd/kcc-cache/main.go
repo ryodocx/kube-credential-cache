@@ -133,7 +133,6 @@ func main() {
 		}
 		cmd := exec.Command(os.Args[1], os.Args[2:]...)
 		cmd.Stderr = os.Stderr
-		cmd.Env = os.Environ()
 		bytes, err := cmd.Output()
 
 		if err != nil {
