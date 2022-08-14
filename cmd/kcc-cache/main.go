@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+type CacheFile struct {
+	Credentials map[string]ClientAuthentication `json:"credentials"`
+}
+
 // https://kubernetes.io/docs/reference/config-api/client-authentication.v1
 type ClientAuthentication struct {
 	APIVersion string   `json:"apiVersion"`
@@ -23,10 +27,6 @@ type ClientAuthentication struct {
 		ClientCertificateData string    `json:"clientCertificateData,omitempty"`
 		ClientKeyData         string    `json:"clientKeyData,omitempty"`
 	} `json:"status"`
-}
-
-type CacheFile struct {
-	Tokens map[string]ClientAuthentication `json:"tokens"`
 }
 
 func main() {
@@ -120,10 +120,10 @@ func main() {
 	}()
 
 	// check cache
-	if len(cacheFile.Tokens) == 0 {
-		cacheFile.Tokens = map[string]ClientAuthentication{}
+	if len(cacheFile.Credentials) == 0 {
+		cacheFile.Credentials = map[string]ClientAuthentication{}
 	}
-	cache, ok := cacheFile.Tokens[cacheKey]
+	cache, ok := cacheFile.Credentials[cacheKey]
 	if !ok || ok && time.Until(cache.Status.ExpirationTimestamp) < refreshMargin {
 		// refresh
 		tmpCache := ClientAuthentication{}
@@ -148,12 +148,12 @@ func main() {
 			log.Fatalf("Obtained token has expired: %s", string(bytes))
 		}
 
-		cacheFile.Tokens[cacheKey] = tmpCache
+		cacheFile.Credentials[cacheKey] = tmpCache
 		updated = true
 	}
 
 	// print
-	output, err := json.Marshal(cacheFile.Tokens[cacheKey])
+	output, err := json.Marshal(cacheFile.Credentials[cacheKey])
 	if err != nil {
 		log.Fatalf("json.Marshal() failed: %s", err)
 	}
