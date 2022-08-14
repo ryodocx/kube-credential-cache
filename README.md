@@ -43,7 +43,7 @@ or download from [releases](https://github.com/ryodocx/kube-credential-cache/rel
 
 ## Usage
 
-install & just run `kcc-injector -i ~/.kube/config`
+install & **just run** `kcc-injector -i ~/.kube/config`
 
 if manually edit kubeconfig,
   * set `kcc-cache` to command
