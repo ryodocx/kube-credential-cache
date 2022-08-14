@@ -49,7 +49,9 @@ if manually edit kubeconfig,
   * set `kcc-cache` to command
   * original command move to args
 
-EKS
+##### examples of kubeconfig
+
+EKS (same effect as `kcc-injector -i <your kubeconfig>`)
 
 ```diff
 kind: Config
