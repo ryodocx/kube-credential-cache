@@ -16,6 +16,7 @@ Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/c
   - [x] Cache [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1beta1/#client-authentication-k8s-io-v1beta1-ExecCredential) object
   - [ ] Async credential refresh
 - Cache file
+  - [x] Concern Command, Args, Env as cache-key
   - [ ] Encryption
 - kubeconfig
   - [x] kubeconfig optimizer (inject cache command automatically)
@@ -45,7 +46,6 @@ install & just run `kcc-injector -i <your kubeconfig>`
 if manually edit kubeconfig,
   * set `kcc-cache` to command
   * original command move to args
-  * **remove env** because `kcc-cache` only uses args for cache key
 
 EKS
 
@@ -71,11 +71,9 @@ users:
           - get-token
           - --cluster-name
           - <your-cluster>
-+         - --profile
-+         - <your-profile>
--       env:
--         - name: AWS_PROFILE
--           value: <your-profile>
+        env:
+          - name: AWS_PROFILE
+            value: <your-profile>
 ```
 
 EKS with [aws-vault](https://github.com/99designs/aws-vault)
@@ -119,10 +117,11 @@ kubeconfig specification
 
 ### kcc-cache
 
-| Environment variable                 | default                                                                                                                                                                                                                                        | description                  |
-|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
-| KUBE_CREDENTIAL_CACHE_FILE           | macOS:</br>`~/Library/Caches/kube-credential-cache/cache.json`</br>Linux:</br>`$XDG_CACHE_HOME/kube-credential-cache/cache.json`</br>`~/.cache/kube-credential-cache/cache.json`</br>Windows:</br>`%AppData%\kube-credential-cache\cache.json` | path of Cache file           |
-| KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN | `30s`                                                                                                                                                                                                                                          | margin of credential refresh |
+| Environment variable                    | default                                                                                                                                                                                                                                        | description                                        |
+|-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
+| KUBE_CREDENTIAL_CACHE_FILE              | macOS:</br>`~/Library/Caches/kube-credential-cache/cache.json`</br>Linux:</br>`$XDG_CACHE_HOME/kube-credential-cache/cache.json`</br>`~/.cache/kube-credential-cache/cache.json`</br>Windows:</br>`%AppData%\kube-credential-cache\cache.json` | path of Cache file                                 |
+| KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN    | `30s`                                                                                                                                                                                                                                          | margin of credential refresh                       |
+| KUBE_CREDENTIAL_CACHE_CACHEKEY_ENV_LIST | `AWS_PROFILE,AWS_REGION`                                                                                                                                                                                                                       | comma separated env names for additional cache-key |
 
 ### kcc-injector
 

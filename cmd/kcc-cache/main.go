@@ -32,8 +32,9 @@ type CacheFile struct {
 func main() {
 	// configuration
 	var (
-		cacheFilepath string
-		refreshMargin time.Duration = time.Second * 30
+		cacheFilepath   string
+		refreshMargin   time.Duration = time.Second * 30
+		cacheKeyEnvlist []string      = []string{"AWS_PROFILE", "AWS_REGION"}
 	)
 	if e := os.Getenv("KUBE_CREDENTIAL_CACHE_FILE"); e != "" {
 		cacheFilepath = e
@@ -50,6 +51,25 @@ func main() {
 			log.Fatalf("invalid environment variable 'KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN': %s", err.Error())
 		}
 		refreshMargin = d
+	}
+	if e := os.Getenv("KUBE_CREDENTIAL_CACHE_CACHEKEY_ENV_LIST"); e != "" {
+		cacheKeyEnvlist = strings.Split(e, ",")
+	}
+
+	// cache key
+	var cacheKey string = strings.Join(os.Args[1:], " ")
+	{
+		env := ""
+		for _, key := range cacheKeyEnvlist {
+			v := os.Getenv(key)
+			if v == "" {
+				continue
+			}
+			env = fmt.Sprintf("%s %s='%s'", env, key, v)
+		}
+		if env != "" {
+			cacheKey = fmt.Sprintf("%s # env:%s", cacheKey, env)
+		}
 	}
 
 	// open file
@@ -103,7 +123,7 @@ func main() {
 	if len(cacheFile.Tokens) == 0 {
 		cacheFile.Tokens = map[string]ClientAuthentication{}
 	}
-	cache, ok := cacheFile.Tokens[mapKey()]
+	cache, ok := cacheFile.Tokens[cacheKey]
 	if !ok || ok && time.Until(cache.Status.ExpirationTimestamp) < refreshMargin {
 		// refresh
 		tmpCache := ClientAuthentication{}
@@ -128,18 +148,14 @@ func main() {
 			log.Fatalf("Obtained token has expired: %s", string(bytes))
 		}
 
-		cacheFile.Tokens[mapKey()] = tmpCache
+		cacheFile.Tokens[cacheKey] = tmpCache
 		updated = true
 	}
 
 	// print
-	output, err := json.Marshal(cacheFile.Tokens[mapKey()])
+	output, err := json.Marshal(cacheFile.Tokens[cacheKey])
 	if err != nil {
 		log.Fatalf("json.Marshal() failed: %s", err)
 	}
 	fmt.Println(string(output))
-}
-
-func mapKey() string {
-	return strings.Join(os.Args[1:], " ")
 }
