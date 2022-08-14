@@ -115,7 +115,7 @@ users:
 
 kubeconfig specification
 * https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
-* https://github.com/kubernetes/client-go/blob/release-1.24/tools/clientcmd/api/v1/types.go#L28-L52
+* https://pkg.go.dev/k8s.io/client-go/tools/clientcmd/api/v1#Config
 
 ## Configration
 
