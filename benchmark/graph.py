@@ -24,8 +24,8 @@ fig2.savefig('graph_credential.svg')
 # eks kubectl
 fig3, ax3 = plt.subplots()
 x = ['with cache', 'normal']
-y = [211, 811]
-ax3.set_title("run kubectl version(with EKS)[ms]")
+y = [211, 812]
+ax3.set_title("run kubectl with EKS[ms]")
 ax3.bar(x, y)
 for x, y in zip(x, y):
     plt.text(x, y, y, ha='center', va='bottom')
