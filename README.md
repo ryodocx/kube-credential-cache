@@ -39,6 +39,8 @@ go install github.com/ryodocx/kube-credential-cache/cmd/kcc-injector@latest
 asdf plugin add kube-credential-cache
 ```
 
+or download from [releases](https://github.com/ryodocx/kube-credential-cache/releases)
+
 ## Usage
 
 install & just run `kcc-injector -i <your kubeconfig>`
