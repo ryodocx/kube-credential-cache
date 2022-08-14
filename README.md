@@ -16,6 +16,7 @@ Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/c
   - [x] Cache [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1beta1/#client-authentication-k8s-io-v1beta1-ExecCredential) object
   - [ ] Async credential refresh
 - Cache file
+  - [x] Concern Command, Args, Env as cache-key
   - [ ] Encryption
 - kubeconfig
   - [x] kubeconfig optimizer (inject cache command automatically)
@@ -45,7 +46,6 @@ install & just run `kcc-injector -i <your kubeconfig>`
 if manually edit kubeconfig,
   * set `kcc-cache` to command
   * original command move to args
-  * **remove env** because `kcc-cache` only uses args for cache key
 
 EKS
 
@@ -71,11 +71,9 @@ users:
           - get-token
           - --cluster-name
           - <your-cluster>
-+         - --profile
-+         - <your-profile>
--       env:
--         - name: AWS_PROFILE
--           value: <your-profile>
+        env:
+          - name: AWS_PROFILE
+            value: <your-profile>
 ```
 
 EKS with [aws-vault](https://github.com/99designs/aws-vault)
