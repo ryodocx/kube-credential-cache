@@ -18,9 +18,8 @@ type CacheFile struct {
 
 // https://kubernetes.io/docs/reference/config-api/client-authentication.v1
 type ClientAuthentication struct {
-	APIVersion string   `json:"apiVersion"`
-	Kind       string   `json:"kind"`
-	Spec       struct{} `json:"spec"`
+	APIVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
 	Status     struct {
 		ExpirationTimestamp   time.Time `json:"expirationTimestamp"`
 		Token                 string    `json:"token,omitempty"`
