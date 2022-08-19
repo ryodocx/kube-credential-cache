@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
+	"runtime/debug"
 	"strings"
 	"time"
 )
@@ -40,14 +41,14 @@ func main() {
 	} else {
 		cacheDir, err := os.UserCacheDir()
 		if err != nil {
-			log.Fatalf(os.Args[0]+": can't find CacheDir. fix error or set 'KUBE_CREDENTIAL_CACHE_FILE': %s", err)
+			fatal("can't find CacheDir. fix error or set 'KUBE_CREDENTIAL_CACHE_FILE': %s", err)
 		}
 		cacheFilepath = path.Join(cacheDir, "kube-credential-cache", "cache.json")
 	}
 	if e := os.Getenv("KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN"); e != "" {
 		d, err := time.ParseDuration(e)
 		if err != nil {
-			log.Fatalf(os.Args[0]+": invalid environment variable 'KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN': %s", err.Error())
+			fatal("invalid environment variable 'KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN': %s", err.Error())
 		}
 		refreshMargin = d
 	}
@@ -76,14 +77,14 @@ func main() {
 	if err != nil {
 		if os.IsNotExist(err) {
 			if err := os.MkdirAll(path.Dir(cacheFilepath), 0700); err != nil {
-				log.Fatalf(os.Args[0]+": mkdir failed: %s", err)
+				fatal("mkdir failed: %s", err)
 			}
 			f, err = os.OpenFile(cacheFilepath, os.O_RDWR|os.O_CREATE, 0600)
 			if err != nil {
-				log.Fatalf(os.Args[0]+": file open failed(after mkdir): %s", err)
+				fatal("file open failed(after mkdir): %s", err)
 			}
 		} else {
-			log.Fatalf(os.Args[0]+": file open failed: %s", err)
+			fatal("file open failed: %s", err)
 		}
 	}
 	defer f.Close()
@@ -93,11 +94,11 @@ func main() {
 	cacheFile := CacheFile{}
 	bytes, err := io.ReadAll(f)
 	if err != nil {
-		log.Fatalf(os.Args[0]+": file read failed: %s", err)
+		fatal("file read failed: %s", err)
 	}
 	if len(bytes) > 0 {
 		if err := json.Unmarshal(bytes, &cacheFile); err != nil {
-			log.Fatalf(os.Args[0]+": json.Unmarshal() failed(read cache file): %s", err)
+			fatal("json.Unmarshal() failed(read cache file): %s", err)
 		}
 	}
 	defer func() {
@@ -128,22 +129,25 @@ func main() {
 		tmpCache := ClientAuthentication{}
 
 		if len(os.Args) < 2 {
-			log.Fatalf(os.Args[0] + ": not enough command at args")
+			fatal("not enough command at args")
 		}
 		cmd := exec.Command(os.Args[1], os.Args[2:]...)
 		cmd.Stderr = os.Stderr
 		bytes, err := cmd.Output()
 
 		if err != nil {
-			log.Fatalf(os.Args[0]+": read command output failed: %s\noutput: %s", err, string(bytes))
+			if len(bytes) > 0 {
+				fatal("read command output failed: %s\noutput: %s", err, string(bytes))
+			}
+			fatal("read command output failed: %s", err)
 		}
 
 		if err := json.Unmarshal(bytes, &tmpCache); err != nil {
-			log.Fatalf(os.Args[0]+": json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
+			fatal("json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
 		}
 
 		if time.Until(tmpCache.Status.ExpirationTimestamp) < refreshMargin {
-			log.Fatalf(os.Args[0]+": Obtained token has expired: %s", string(bytes))
+			fatal("Obtained token has expired: %s", string(bytes))
 		}
 
 		cacheFile.Credentials[cacheKey] = tmpCache
@@ -153,7 +157,25 @@ func main() {
 	// print
 	output, err := json.Marshal(cacheFile.Credentials[cacheKey])
 	if err != nil {
-		log.Fatalf(os.Args[0]+": json.Marshal() failed: %s", err)
+		fatal("json.Marshal() failed: %s", err)
 	}
 	fmt.Println(string(output))
+}
+
+func fatal(format string, v ...any) {
+	var commit string = "main"
+	i, ok := debug.ReadBuildInfo()
+	if ok {
+		for _, v := range i.Settings {
+			if v.Key == "vcs.revision" {
+				commit = v.Value
+			}
+		}
+	}
+	_, _, line, _ := runtime.Caller(1)
+
+	fmt.Fprintf(os.Stderr, "%s: ", path.Base(os.Args[0]))
+	fmt.Fprintf(os.Stderr, format+"\n", v...)
+	fmt.Fprintf(os.Stderr, "error occurred at: https://github.com/ryodocx/kube-credential-cache/blob/%s/cmd/kcc-cache/main.go#L%d\n", commit, line)
+	os.Exit(1)
 }
