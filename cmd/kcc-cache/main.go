@@ -164,8 +164,7 @@ func main() {
 
 func fatal(format string, v ...any) {
 	var commit string = "main"
-	i, ok := debug.ReadBuildInfo()
-	if ok {
+	if i, ok := debug.ReadBuildInfo(); ok {
 		for _, v := range i.Settings {
 			if v.Key == "vcs.revision" {
 				commit = v.Value
