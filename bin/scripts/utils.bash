@@ -22,9 +22,16 @@ sort_versions() {
 }
 
 list_github_tags() {
-  git ls-remote --tags --refs "$GH_REPO" |
-    grep -o 'refs/tags/.*' | cut -d/ -f3- |
-    sed 's/^v//'
+  if which jq &>/dev/null; then
+    # TODO: support pagination
+    curl "${curl_opts[@]}" "https://api.github.com/repos/ryodocx/kube-credential-cache/releases?per_page=100" |
+      jq -r '.[] | select(.prerelease == false) | .tag_name' |
+      sed 's/^v//'
+  else
+    git ls-remote --tags --refs "$GH_REPO" |
+      grep -o 'refs/tags/.*' | cut -d/ -f3- |
+      sed 's/^v//'
+  fi
 }
 
 list_all_versions() {

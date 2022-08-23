@@ -10,10 +10,10 @@ Faster access to kubernetes!
 especially, for kubectl + EKS
 
 ## Features
-Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1beta1/#client-authentication-k8s-io-v1beta1-ExecCredential) object, when use [client-go credential plugins](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) of Kubernetes. (e.g. kubectl)
+Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1/#client-authentication-k8s-io-v1-ExecCredential) object, when use [client-go credential plugins](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) of Kubernetes. (e.g. kubectl)
 
 - Caching
-  - [x] Cache [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1beta1/#client-authentication-k8s-io-v1beta1-ExecCredential) object
+  - [x] Cache [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1/#client-authentication-k8s-io-v1-ExecCredential) object
   - [ ] Async credential refresh
 - Cache file
   - [x] Concern Command, Args, Env as cache-key
@@ -115,7 +115,7 @@ users:
 
 kubeconfig specification
 * https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
-* https://github.com/kubernetes/client-go/blob/release-1.24/tools/clientcmd/api/v1/types.go#L28-L52
+* https://pkg.go.dev/k8s.io/client-go/tools/clientcmd/api/v1#Config
 
 ## Configration
 
