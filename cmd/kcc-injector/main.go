@@ -59,12 +59,28 @@ func main() {
 	}
 
 	// manipulation
-	for _, user := range kubeConfig.AuthInfos {
-		if user.Exec == nil || user.Exec.Command == replaceCmd {
+	for name, user := range kubeConfig.AuthInfos {
+		if user.Exec == nil {
 			continue
 		}
-		user.Exec.Args = append([]string{user.Exec.Command}, user.Exec.Args...)
-		user.Exec.Command = replaceCmd
+		if user.Exec.Command != replaceCmd {
+			user.Exec.Args = append([]string{user.Exec.Command}, user.Exec.Args...)
+			user.Exec.Command = replaceCmd
+		}
+
+		found := false
+		userEnv := api.ExecEnvVar{
+			Name:  "KUBE_CREDENTIAL_CACHE_USER",
+			Value: name,
+		}
+		for i, e := range user.Exec.Env {
+			if e.Name == "KUBE_CREDENTIAL_CACHE_USER" {
+				user.Exec.Env[i] = userEnv
+			}
+		}
+		if !found {
+			user.Exec.Env = append(user.Exec.Env, userEnv)
+		}
 	}
 
 	// output

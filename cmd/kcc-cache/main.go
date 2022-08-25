@@ -34,7 +34,7 @@ func main() {
 	var (
 		cacheFilepath   string
 		refreshMargin   time.Duration = time.Second * 30
-		cacheKeyEnvlist []string      = []string{"AWS_PROFILE", "AWS_REGION"}
+		cacheKeyEnvlist []string      = []string{"KUBE_CREDENTIAL_CACHE_USER", "AWS_PROFILE", "AWS_REGION"}
 	)
 	if e := os.Getenv("KUBE_CREDENTIAL_CACHE_FILE"); e != "" {
 		cacheFilepath = e
