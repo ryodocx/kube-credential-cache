@@ -13,6 +13,7 @@ import (
 
 var (
 	inPlaceFlag bool
+	restoreFlag bool
 	replaceCmd  string = "kcc-cache"
 )
 
@@ -23,6 +24,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 	flag.BoolVar(&inPlaceFlag, "i", false, "edit file in-place")
+	flag.BoolVar(&restoreFlag, "r", false, "restore kubeconfig to original")
 	flag.StringVar(&replaceCmd, "c", replaceCmd, "injection command")
 	flag.Parse()
 
@@ -58,13 +60,61 @@ func main() {
 		kubeConfig = apiConfig
 	}
 
-	// manipulation
-	for _, user := range kubeConfig.AuthInfos {
-		if user.Exec == nil || user.Exec.Command == replaceCmd {
-			continue
+	// kubeconfig manipulation
+	if restoreFlag {
+		// restore to original
+		for _, user := range kubeConfig.AuthInfos {
+			if user.Exec == nil {
+				continue
+			}
+			if user.Exec.Command == replaceCmd {
+				user.Exec.Command = user.Exec.Args[0]
+				user.Exec.Args = user.Exec.Args[1:]
+			}
+
+			search := func() (index int) {
+				for i, e := range user.Exec.Env {
+					if e.Name == "KUBE_CREDENTIAL_CACHE_USER" {
+						return i
+					}
+				}
+				return -1
+			}
+
+			for {
+				i := search()
+				if i == -1 {
+					break
+				}
+				user.Exec.Env = append(user.Exec.Env[:i], user.Exec.Env[i+1:]...)
+			}
 		}
-		user.Exec.Args = append([]string{user.Exec.Command}, user.Exec.Args...)
-		user.Exec.Command = replaceCmd
+	} else {
+		// enable cache
+		for name, user := range kubeConfig.AuthInfos {
+			if user.Exec == nil {
+				continue
+			}
+			if user.Exec.Command != replaceCmd {
+				user.Exec.Args = append([]string{user.Exec.Command}, user.Exec.Args...)
+				user.Exec.Command = replaceCmd
+			}
+
+			found := false
+			userEnv := api.ExecEnvVar{
+				Name:  "KUBE_CREDENTIAL_CACHE_USER",
+				Value: name,
+			}
+			for i, e := range user.Exec.Env {
+				if e.Name == "KUBE_CREDENTIAL_CACHE_USER" {
+					found = true
+					user.Exec.Env[i] = userEnv
+				}
+			}
+			if !found {
+				user.Exec.Env = append(user.Exec.Env, userEnv)
+			}
+		}
 	}
 
 	// output

@@ -9,6 +9,9 @@
 Faster access to kubernetes!
 especially, for kubectl + EKS
 
+## Architecture
+![](./docs/summary.drawio.svg)
+
 ## Features
 Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1/#client-authentication-k8s-io-v1-ExecCredential) object, when use [client-go credential plugins](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) of Kubernetes. (e.g. kubectl)
 
@@ -19,7 +22,8 @@ Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/c
   - [x] Concern Command, Args, Env as cache-key
   - [ ] Encryption
 - kubeconfig
-  - [x] kubeconfig optimizer (inject cache command automatically)
+  - [x] kubeconfig optimizer (inject kcc-cache command automatically)
+  - [x] kubeconfig recovery  (remove injected commands)
 
 ## Effects
 A one of notable effect is, when used [`aws eks update-kubeconfig`](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html) to access EKS. about 500ms faster!
@@ -41,15 +45,23 @@ asdf plugin add kube-credential-cache
 
 or download from [releases](https://github.com/ryodocx/kube-credential-cache/releases)
 
-## Usage
+## Usage(edit kubeconfig)
 
-install & **just run** `kcc-injector -i ~/.kube/config`
+:running: install & just run `kcc-injector -i ~/.kube/config`
+
+:ambulance: restore kubeconfig: `kcc-injector -i -r <your kubeconfig>`
+
+
+<details>
+<summary>manual setup</summary>
+<p>
 
 if manually edit kubeconfig,
   * set `kcc-cache` to command
   * original command move to args
-
-##### examples of kubeconfig
+  * :warning: **Do not use the same pattern for command, args and env**
+    * :warning:U sing the same pattern presents the risk of mixing up credentials
+    * :warning: env is ignored if not in `KUBE_CREDENTIAL_CACHE_CACHEKEY_ENV_LIST`
 
 EKS (same effect as `kcc-injector -i <your kubeconfig>`)
 
@@ -117,6 +129,9 @@ kubeconfig specification
 * https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
 * https://pkg.go.dev/k8s.io/client-go/tools/clientcmd/api/v1#Config
 
+</p>
+</details>
+
 ## Configration
 
 ### kcc-cache
@@ -125,7 +140,7 @@ kubeconfig specification
 |-----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
 | KUBE_CREDENTIAL_CACHE_FILE              | macOS:</br>`~/Library/Caches/kube-credential-cache/cache.json`</br>Linux:</br>`$XDG_CACHE_HOME/kube-credential-cache/cache.json`</br>`~/.cache/kube-credential-cache/cache.json`</br>Windows:</br>`%AppData%\kube-credential-cache\cache.json` | path of Cache file                                 |
 | KUBE_CREDENTIAL_CACHE_REFRESH_MARGIN    | `30s`                                                                                                                                                                                                                                          | margin of credential refresh                       |
-| KUBE_CREDENTIAL_CACHE_CACHEKEY_ENV_LIST | `AWS_PROFILE,AWS_REGION`                                                                                                                                                                                                                       | comma separated env names for additional cache-key |
+| KUBE_CREDENTIAL_CACHE_CACHEKEY_ENV_LIST | `KUBE_CREDENTIAL_CACHE_USER,AWS_PROFILE,AWS_REGION`                                                                                                                                                                                            | comma separated env names for additional cache-key |
 
 ### kcc-injector
 
@@ -135,4 +150,5 @@ Usage: kcc-injector [flags] <kubeconfig filepath>
   -c string
         injection command (default "kcc-cache")
   -i    edit file in-place
+  -r    restore kubeconfig to original
 ```
