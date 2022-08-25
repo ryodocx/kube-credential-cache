@@ -47,10 +47,14 @@ or download from [releases](https://github.com/ryodocx/kube-credential-cache/rel
 ## Usage
 
 install & **just run** `kcc-injector -i ~/.kube/config`
+:ambulance: restore kubeconfig: `kcc-injector -i -r <your kubeconfig>`
 
 if manually edit kubeconfig,
   * set `kcc-cache` to command
   * original command move to args
+  * :warning: **Do not use the same pattern for command, args and env**
+    * :warning:U sing the same pattern presents the risk of mixing up credentials
+    * :warning: env is ignored if not in `KUBE_CREDENTIAL_CACHE_CACHEKEY_ENV_LIST`
 
 ##### examples of kubeconfig
 
