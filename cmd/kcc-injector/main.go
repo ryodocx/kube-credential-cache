@@ -107,6 +107,7 @@ func main() {
 			}
 			for i, e := range user.Exec.Env {
 				if e.Name == "KUBE_CREDENTIAL_CACHE_USER" {
+					found = true
 					user.Exec.Env[i] = userEnv
 				}
 			}
