@@ -135,4 +135,5 @@ Usage: kcc-injector [flags] <kubeconfig filepath>
   -c string
         injection command (default "kcc-cache")
   -i    edit file in-place
+  -r    restore kubeconfig to original
 ```
