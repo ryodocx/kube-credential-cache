@@ -22,7 +22,8 @@ Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/c
   - [x] Concern Command, Args, Env as cache-key
   - [ ] Encryption
 - kubeconfig
-  - [x] kubeconfig optimizer (inject cache command automatically)
+  - [x] kubeconfig optimizer (inject kcc-cache command automatically)
+  - [x] kubeconfig recovery  (remove injected commands)
 
 ## Effects
 A one of notable effect is, when used [`aws eks update-kubeconfig`](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html) to access EKS. about 500ms faster!
@@ -44,10 +45,16 @@ asdf plugin add kube-credential-cache
 
 or download from [releases](https://github.com/ryodocx/kube-credential-cache/releases)
 
-## Usage
+## Usage(edit kubeconfig)
 
-install & **just run** `kcc-injector -i ~/.kube/config`
+:running: install & just run `kcc-injector -i ~/.kube/config`
+
 :ambulance: restore kubeconfig: `kcc-injector -i -r <your kubeconfig>`
+
+
+<details>
+<summary>manual setup</summary>
+<p>
 
 if manually edit kubeconfig,
   * set `kcc-cache` to command
@@ -55,8 +62,6 @@ if manually edit kubeconfig,
   * :warning: **Do not use the same pattern for command, args and env**
     * :warning:U sing the same pattern presents the risk of mixing up credentials
     * :warning: env is ignored if not in `KUBE_CREDENTIAL_CACHE_CACHEKEY_ENV_LIST`
-
-##### examples of kubeconfig
 
 EKS (same effect as `kcc-injector -i <your kubeconfig>`)
 
@@ -123,6 +128,9 @@ users:
 kubeconfig specification
 * https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
 * https://pkg.go.dev/k8s.io/client-go/tools/clientcmd/api/v1#Config
+
+</p>
+</details>
 
 ## Configration
 
