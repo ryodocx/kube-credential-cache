@@ -9,8 +9,7 @@
 Faster access to kubernetes!
 especially, for kubectl + EKS
 
-##　Architecture
-
+## Architecture
 ![](./docs/summary.drawio.svg)
 
 ## Features
