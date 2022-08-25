@@ -9,6 +9,9 @@
 Faster access to kubernetes!
 especially, for kubectl + EKS
 
+##　Architecture
+![](./docs/summary.drawio.svg)
+
 ## Features
 Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1/#client-authentication-k8s-io-v1-ExecCredential) object, when use [client-go credential plugins](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) of Kubernetes. (e.g. kubectl)
 
