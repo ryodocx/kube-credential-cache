@@ -12,7 +12,7 @@ Especially effective with kubectl + EKS
 ## Architecture
 [![](./docs/summary.drawio.svg)](./docs)
 
-details is [here](./docs)
+details is [here](./docs) (includes sequence diagram)
 
 ## Features
 Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1/#client-authentication-k8s-io-v1-ExecCredential) object, when use [credential plugins](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins) of Kubernetes. (e.g. kubectl)
