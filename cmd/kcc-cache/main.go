@@ -158,10 +158,6 @@ func main() {
 			fatal("json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
 		}
 
-		if time.Until(tmpCache.Status.ExpirationTimestamp) < refreshMargin {
-			fatal("Obtained token has expired: %s", string(bytes))
-		}
-
 		cacheFile.Credentials[cacheKey] = tmpCache
 		updated = true
 	}
