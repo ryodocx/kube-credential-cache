@@ -3,12 +3,12 @@
 
 ## Sequence
 
-### Without cache
+### Without kcc-cache
 
 ```mermaid
 sequenceDiagram
     actor user as User
-    participant tool as kubectl
+    participant tool
     participant client as K8s client library
     participant plugin as credential plugin
     participant k8s as Kubernetes
@@ -16,55 +16,64 @@ sequenceDiagram
     user ->>+  tool: run
     tool ->>+  client: init
     client ->> client: load kubeconfig
-    tool ->> client: method call
     rect rgb(200, 150, 255)
       client ->>+ plugin: request credential
       plugin ->> plugin: slow process
       plugin -->>- client: credential
     end
+    client -->> tool: ready
     loop
+      tool ->> client: method call
       client ->> k8s: API call
       k8s -->> client: result
       client ->> client: process
+      client -->> tool: result
     end
-    client -->> tool: result
     tool -->> user: result
 
     deactivate client
     deactivate tool
 ```
 
-### With cache
+### With kcc-cache
 
 ```mermaid
 sequenceDiagram
     actor user as User
-    participant tool as kubectl
+    participant tool
     participant client as K8s client library
-    participant cache as [kcc-cache]
+    participant cache as **kcc-cache**
     participant plugin as credential plugin
     participant k8s as Kubernetes
 
     user ->>+  tool: run
     tool ->>+  client: init
     client ->> client: load kubeconfig
-    tool ->> client: method call
     client ->>+ cache: request credential
     cache ->> cache: check cache
-    alt cache not exists or expired
+    alt cache hit
+      rect rgb(50, 156, 252)
+        cache -->> client: credential
+      end
+      client -->> tool: ready
+    else cache not exists or expired
       rect rgb(200, 150, 255)
         cache ->>+ plugin: request credential
         plugin ->> plugin: slow process
         plugin -->>- cache: credential
+        cache ->> cache: update cache
+        cache -->> client: credential
       end
+      deactivate cache
+      client -->> tool: ready
     end
-    cache -->>- client: credential
     loop
+      tool ->> client: method call
       client ->> k8s: API call
       k8s -->> client: result
       client ->> client: process
+      client -->> tool: result
     end
-    client -->> tool: result
     tool -->> user: result
 
     deactivate client
