@@ -145,9 +145,13 @@ func main() {
 
 		if err != nil {
 			if len(bytes) > 0 {
-				fatal("read command output failed: %s\noutput: %s", err, string(bytes))
+				fatal("read command output failed: %s\nactual stdout: %s", err, string(bytes))
 			}
 			fatal("read command output failed: %s", err)
+		}
+
+		if len(bytes) == 0 {
+			fatal("empty stdout, but without error")
 		}
 
 		if err := json.Unmarshal(bytes, &tmpCache); err != nil {
