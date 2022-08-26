@@ -110,6 +110,14 @@ func main() {
 				}
 			}
 
+			// cleanup
+			for k, v := range cacheFile.Credentials {
+				if time.Now().After(v.Status.ExpirationTimestamp) {
+					delete(cacheFile.Credentials, k)
+				}
+			}
+
+			// update
 			err := f.Truncate(0)
 			qpanic(err)
 			bytes, err := json.Marshal(cacheFile)
