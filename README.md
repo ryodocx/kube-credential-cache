@@ -6,8 +6,8 @@
 [![GoReleaser](https://github.com/ryodocx/kube-credential-cache/actions/workflows/goreleaser.yaml/badge.svg)](https://github.com/ryodocx/kube-credential-cache/actions/workflows/goreleaser.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ryodocx/kube-credential-cache)](https://goreportcard.com/report/github.com/ryodocx/kube-credential-cache)
 
-Faster access to kubernetes!
-especially, for kubectl + EKS
+Fast access to Kubernetes!
+Especially effective with kubectl + EKS
 
 ## Architecture
 ![](./docs/summary.drawio.svg)
