@@ -110,6 +110,14 @@ func main() {
 				}
 			}
 
+			// cleanup
+			for k, v := range cacheFile.Credentials {
+				if time.Now().After(v.Status.ExpirationTimestamp) {
+					delete(cacheFile.Credentials, k)
+				}
+			}
+
+			// update
 			err := f.Truncate(0)
 			qpanic(err)
 			bytes, err := json.Marshal(cacheFile)
@@ -137,17 +145,17 @@ func main() {
 
 		if err != nil {
 			if len(bytes) > 0 {
-				fatal("read command output failed: %s\noutput: %s", err, string(bytes))
+				fatal("read command output failed: %s\nactual stdout: %s", err, string(bytes))
 			}
 			fatal("read command output failed: %s", err)
 		}
 
-		if err := json.Unmarshal(bytes, &tmpCache); err != nil {
-			fatal("json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
+		if len(bytes) == 0 {
+			fatal("empty stdout, but without error")
 		}
 
-		if time.Until(tmpCache.Status.ExpirationTimestamp) < refreshMargin {
-			fatal("Obtained token has expired: %s", string(bytes))
+		if err := json.Unmarshal(bytes, &tmpCache); err != nil {
+			fatal("json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
 		}
 
 		cacheFile.Credentials[cacheKey] = tmpCache
