@@ -138,9 +138,8 @@ kubeconfig specification
 
 ###### `error: You must be logged in to the server (the server has asked for the client to provide credentials)` at kubectl
 Incorrect credentials may be cached.  
-For example, occur when using the wrong pair of aws-vault and kubecontext.  
-Try remove cache file
-In macOS: `rm ~/Library/Caches/kube-credential-cache/cache.json`
+For example, occur when using the wrong pair of aws-vault context and kubecontext.  
+**Try remove cache file!** In macOS: `rm ~/Library/Caches/kube-credential-cache/cache.json`  
 ※see below `kcc-cache` configuration for other environment
 
 ###### `...Corruption detected, recreate cache file`
