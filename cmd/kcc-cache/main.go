@@ -98,7 +98,8 @@ func main() {
 	}
 	if len(bytes) > 0 {
 		if err := json.Unmarshal(bytes, &cacheFile); err != nil {
-			fatal("json.Unmarshal() failed(read cache file): %s", err)
+			log("json.Unmarshal() failed(read cache file): %s\n...Corruption detected, recreate cache file", err)
+			updated = true
 		}
 	}
 	defer func() {
@@ -171,6 +172,8 @@ func main() {
 }
 
 func fatal(format string, v ...any) {
+	log(format, v...)
+
 	var commit string = "main"
 	if i, ok := debug.ReadBuildInfo(); ok {
 		for _, v := range i.Settings {
@@ -180,9 +183,12 @@ func fatal(format string, v ...any) {
 		}
 	}
 	_, _, line, _ := runtime.Caller(1)
+	fmt.Fprintf(os.Stderr, "error occurred at: https://github.com/ryodocx/kube-credential-cache/blob/%s/cmd/kcc-cache/main.go#L%d\n", commit, line)
 
+	os.Exit(1)
+}
+
+func log(format string, v ...any) {
 	fmt.Fprintf(os.Stderr, "%s: ", path.Base(os.Args[0]))
 	fmt.Fprintf(os.Stderr, format+"\n", v...)
-	fmt.Fprintf(os.Stderr, "error occurred at: https://github.com/ryodocx/kube-credential-cache/blob/%s/cmd/kcc-cache/main.go#L%d\n", commit, line)
-	os.Exit(1)
 }
