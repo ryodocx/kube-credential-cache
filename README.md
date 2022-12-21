@@ -14,7 +14,7 @@ Especially effective with kubectl + EKS
 $ time kubectl version &>/dev/null
 kubectl version &> /dev/null  0.42s user 0.10s system 59% cpu 0.868 total
 
-# after second access
+# cache effective
 $ time kubectl version &>/dev/null
 kubectl version &> /dev/null  0.05s user 0.02s system 24% cpu 0.308 total
 ```
