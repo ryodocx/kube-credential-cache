@@ -7,7 +7,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/ryodocx/kube-credential-cache)](https://goreportcard.com/report/github.com/ryodocx/kube-credential-cache)
 
 Fast access to Kubernetes!
-Especially effective with kubectl + EKS
+Especially effective with kubectl + EKS, about 3~4x faster!
 
 ```sh
 # first time access
@@ -37,7 +37,7 @@ Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/c
   - [x] kubeconfig recovery (remove injected commands)
 
 ## Effects
-A one of notable effect is, when used [`aws eks update-kubeconfig`](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html) to access EKS. about 500ms faster!
+A one of notable effect is, when used [`aws eks update-kubeconfig`](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html) to access EKS. about 500ms(about 3~4x) faster!
 
 ![](./benchmark/graph_eks.svg)
 
