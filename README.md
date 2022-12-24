@@ -50,8 +50,11 @@ benchmark is [here](./benchmark/)
 go install github.com/ryodocx/kube-credential-cache/cmd/kcc-cache@latest
 go install github.com/ryodocx/kube-credential-cache/cmd/kcc-injector@latest
 
-# asdf-vm
+# asdf-vm: https://asdf-vm.com
 asdf plugin add kube-credential-cache
+
+# aqua: https://aquaproj.github.io
+aqua g -i ryodocx/kube-credential-cache
 ```
 
 or download from [releases](https://github.com/ryodocx/kube-credential-cache/releases)
