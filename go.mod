@@ -2,7 +2,7 @@ module github.com/ryodocx/kube-credential-cache
 
 go 1.19
 
-require k8s.io/client-go v0.26.2
+require k8s.io/client-go v0.26.3
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -25,7 +25,7 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apimachinery v0.26.2 // indirect
+	k8s.io/apimachinery v0.26.3 // indirect
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/utils v0.0.0-20221107191617-1a15be271d1d // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
