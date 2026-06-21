@@ -96,7 +96,11 @@ func main() {
 	if err := lock.Lock(); err != nil {
 		fatal("file lock failed: %s", err)
 	}
-	defer lock.Unlock()
+	defer func() {
+		if err := lock.Unlock(); err != nil {
+			log("failed to unlock file: %s", err)
+		}
+	}()
 
 	// read file
 	updated := false
