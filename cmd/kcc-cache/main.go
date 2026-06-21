@@ -11,6 +11,8 @@ import (
 	"runtime/debug"
 	"strings"
 	"time"
+
+	"github.com/gofrs/flock"
 )
 
 type CacheFile struct {
@@ -88,6 +90,13 @@ func main() {
 		}
 	}
 	defer f.Close()
+
+	// lock file
+	lock := flock.New(cacheFilepath + ".lock")
+	if err := lock.Lock(); err != nil {
+		fatal("file lock failed: %s", err)
+	}
+	defer lock.Unlock()
 
 	// read file
 	updated := false
