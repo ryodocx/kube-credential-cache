@@ -23,10 +23,18 @@ sort_versions() {
 
 list_github_tags() {
   if which jq &>/dev/null; then
-    # TODO: support pagination
-    curl "${curl_opts[@]}" "https://api.github.com/repos/ryodocx/kube-credential-cache/releases?per_page=100" |
-      jq -r '.[] | select(.prerelease == false) | .tag_name' |
-      sed 's/^v//'
+    local page=1
+    while true; do
+      local response
+      response=$(curl "${curl_opts[@]}" "https://api.github.com/repos/ryodocx/kube-credential-cache/releases?per_page=100&page=${page}")
+      local len
+      len=$(echo "$response" | jq length)
+      if [ "$len" -eq 0 ]; then
+        break
+      fi
+      echo "$response" | jq -r '.[] | select(.prerelease == false) | .tag_name' | sed 's/^v//'
+      page=$((page + 1))
+    done
   else
     git ls-remote --tags --refs "$GH_REPO" |
       grep -o 'refs/tags/.*' | cut -d/ -f3- |
