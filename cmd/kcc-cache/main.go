@@ -112,8 +112,9 @@ func main() {
 			}
 
 			// cleanup
+			now := time.Now()
 			for k, v := range cacheFile.Credentials {
-				if time.Now().After(v.Status.ExpirationTimestamp) {
+				if now.After(v.Status.ExpirationTimestamp) {
 					delete(cacheFile.Credentials, k)
 				}
 			}
