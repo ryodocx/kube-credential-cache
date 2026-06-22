@@ -70,7 +70,7 @@ func main() {
 			if user.Exec == nil {
 				continue
 			}
-			if user.Exec.Command == replaceCmd {
+			if user.Exec.Command == replaceCmd && len(user.Exec.Args) > 0 {
 				user.Exec.Command = user.Exec.Args[0]
 				user.Exec.Args = user.Exec.Args[1:]
 			}
