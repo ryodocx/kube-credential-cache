@@ -75,22 +75,14 @@ func main() {
 				user.Exec.Args = user.Exec.Args[1:]
 			}
 
-			search := func() (index int) {
-				for i, e := range user.Exec.Env {
-					if e.Name == "KUBE_CREDENTIAL_CACHE_USER" {
-						return i
-					}
+			n := 0
+			for _, e := range user.Exec.Env {
+				if e.Name != "KUBE_CREDENTIAL_CACHE_USER" {
+					user.Exec.Env[n] = e
+					n++
 				}
-				return -1
 			}
-
-			for {
-				i := search()
-				if i == -1 {
-					break
-				}
-				user.Exec.Env = append(user.Exec.Env[:i], user.Exec.Env[i+1:]...)
-			}
+			user.Exec.Env = user.Exec.Env[:n]
 		}
 	} else {
 		// enable cache
