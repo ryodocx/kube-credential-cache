@@ -1,8 +1,7 @@
 module github.com/ryodocx/kube-credential-cache
 
-go 1.21
+go 1.19
 
-toolchain go1.24.3
 
 require k8s.io/client-go v0.29.2
 
