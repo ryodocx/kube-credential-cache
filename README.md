@@ -30,7 +30,7 @@ Work as caching proxy of [ExecCredential](https://kubernetes.io/docs/reference/c
 - kcc-cache
   - [x] Cache [ExecCredential](https://kubernetes.io/docs/reference/config-api/client-authentication.v1/#client-authentication-k8s-io-v1-ExecCredential) object
   - [x] Concern Command, Args, Env as cache-key
-  - [ ] Cache file encryption
+  - [ ] ~~Cache file encryption~~ (Restricted file permissions `0600`/`0700` like AWS CLI are sufficient)
   - [ ] kubeconfig automated maintenance
 - kcc-injector
   - [x] kubeconfig optimize (inject kcc-cache command automatically)
