@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"runtime"
-	"runtime/debug"
 
+	"github.com/ryodocx/kube-credential-cache/internal/util"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
 )
@@ -43,7 +42,7 @@ func main() {
 		}
 		b, err := os.ReadFile(filename)
 		if err != nil {
-			fatal("read error: %s", err)
+			util.Fatal(flag.Usage, "read error: %s", err)
 		}
 		bytes = b
 	}
@@ -53,12 +52,12 @@ func main() {
 	{
 		clientConfig, err := clientcmd.NewClientConfigFromBytes(bytes)
 		if err != nil {
-			fatal("%v", err)
+			util.Fatal(flag.Usage, "%v", err)
 		}
 
 		apiConfig, err := clientConfig.RawConfig()
 		if err != nil {
-			fatal("%v", err)
+			util.Fatal(flag.Usage, "%v", err)
 		}
 		kubeConfig = apiConfig
 	}
@@ -125,33 +124,15 @@ func main() {
 		// in-place
 		err := clientcmd.WriteToFile(kubeConfig, filename)
 		if err != nil {
-			fatal("%v", err)
+			util.Fatal(flag.Usage, "%v", err)
 		}
 	} else {
 		// stdout
 		b, err := clientcmd.Write(kubeConfig)
 		if err != nil {
-			fatal("%v", err)
+			util.Fatal(flag.Usage, "%v", err)
 		}
 
 		fmt.Println(string(b))
 	}
-}
-
-func fatal(format string, v ...any) {
-	var commit string = "main"
-	if i, ok := debug.ReadBuildInfo(); ok {
-		for _, v := range i.Settings {
-			if v.Key == "vcs.revision" {
-				commit = v.Value
-			}
-		}
-	}
-	_, _, line, _ := runtime.Caller(1)
-
-	fmt.Fprintf(os.Stderr, "%s: ", path.Base(os.Args[0]))
-	fmt.Fprintf(os.Stderr, format+"\n", v...)
-	fmt.Fprintf(os.Stderr, "error occurred at: https://github.com/ryodocx/kube-credential-cache/blob/%s/cmd/kcc-injector/main.go#L%d\n", commit, line)
-	flag.Usage()
-	os.Exit(1)
 }
