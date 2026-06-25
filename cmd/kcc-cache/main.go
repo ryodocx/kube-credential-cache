@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/ryodocx/kube-credential-cache/internal/util"
-
 	"github.com/gofrs/flock"
 )
 
