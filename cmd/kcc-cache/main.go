@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gofrs/flock"
 	"github.com/ryodocx/kube-credential-cache/internal/util"
 )
 
@@ -72,68 +73,31 @@ func main() {
 		}
 	}
 
-	// open file
-	f, err := os.OpenFile(cacheFilepath, os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		if os.IsNotExist(err) {
-			if err := os.MkdirAll(path.Dir(cacheFilepath), 0700); err != nil {
-				util.Fatal(nil, "mkdir failed: %s", err)
-			}
-			f, err = os.OpenFile(cacheFilepath, os.O_RDWR|os.O_CREATE, 0600)
-			if err != nil {
-				util.Fatal(nil, "file open failed(after mkdir): %s", err)
-			}
-		} else {
-			util.Fatal(nil, "file open failed: %s", err)
-		}
+	// ensure directory exists
+	if err := os.MkdirAll(path.Dir(cacheFilepath), 0700); err != nil {
+		util.Fatal(nil, "mkdir failed: %s", err)
 	}
-	defer f.Close()
 
-	// read file
-	updated := false
+	// first read (lock free)
 	cacheFile := CacheFile{}
-	bytes, err := io.ReadAll(f)
-	if err != nil {
+	bytes, err := os.ReadFile(cacheFilepath)
+	if err != nil && !os.IsNotExist(err) {
 		util.Fatal(nil, "file read failed: %s", err)
 	}
 	if len(bytes) > 0 {
 		if err := json.Unmarshal(bytes, &cacheFile); err != nil {
 			util.Log("json.Unmarshal() failed(read cache file): %s\n...Corruption detected, recreate cache file", err)
-			updated = true
 		}
 	}
-	defer func() {
-		// update cache file
-		if updated {
-			qpanic := func(err error) {
-				if err != nil {
-					panic(err)
-				}
-			}
 
-			// cleanup
-			now := time.Now()
-			for k, v := range cacheFile.Credentials {
-				if now.After(v.Status.ExpirationTimestamp) {
-					delete(cacheFile.Credentials, k)
-				}
-			}
-
-			// update
-			err := f.Truncate(0)
-			qpanic(err)
-			bytes, err := json.Marshal(cacheFile)
-			qpanic(err)
-			_, err = f.WriteAt(bytes, 0)
-			qpanic(err)
-		}
-	}()
-
-	// check cache
 	if len(cacheFile.Credentials) == 0 {
 		cacheFile.Credentials = map[string]ClientAuthentication{}
 	}
+
 	cache, ok := cacheFile.Credentials[cacheKey]
+	updated := false
+
+	// check if credential needs refreshing
 	if !ok || ok && time.Until(cache.Status.ExpirationTimestamp) < refreshMargin {
 		// refresh
 		tmpCache := ClientAuthentication{}
@@ -141,6 +105,8 @@ func main() {
 		if len(os.Args) < 2 {
 			util.Fatal(nil, "not enough command at args")
 		}
+
+		// Run external command (lock free, no blocking for other cache keys)
 		cmd := exec.Command(os.Args[1], os.Args[2:]...)
 		cmd.Stderr = os.Stderr
 		bytes, err := cmd.Output()
@@ -160,12 +126,94 @@ func main() {
 			util.Fatal(nil, "json.Unmarshal() failed(read command output): %s\nactual stdout: %s", err, string(bytes))
 		}
 
-		cacheFile.Credentials[cacheKey] = tmpCache
 		updated = true
+		cache = tmpCache
+	}
+
+	// write phase (lock needed)
+	if updated {
+		// acquire lock
+		lock := flock.New(cacheFilepath + ".lock")
+		if err := lock.Lock(); err != nil {
+			util.Fatal(nil, "file lock failed: %s", err)
+		}
+
+		// open file
+		f, err := os.OpenFile(cacheFilepath, os.O_RDWR|os.O_CREATE, 0600)
+		if err != nil {
+			// explicitly unlock since fatal will exit
+			_ = lock.Unlock() // errcheck ignored on fatal path
+			util.Fatal(nil, "file open failed: %s", err)
+		}
+
+		// re-read and merge latest data to avoid overwriting parallel changes
+		freshBytes, err := io.ReadAll(f)
+		if err != nil {
+			f.Close()
+			_ = lock.Unlock()
+			util.Fatal(nil, "file read failed (during update): %s", err)
+		}
+
+		if len(freshBytes) > 0 {
+			freshCache := CacheFile{}
+			if err := json.Unmarshal(freshBytes, &freshCache); err == nil {
+				// use the fresh cache map
+				if len(freshCache.Credentials) > 0 {
+					cacheFile.Credentials = freshCache.Credentials
+				}
+			}
+		}
+
+		// update cache key with the freshly acquired token
+		if len(cacheFile.Credentials) == 0 {
+			cacheFile.Credentials = map[string]ClientAuthentication{}
+		}
+		cacheFile.Credentials[cacheKey] = cache
+
+		// cleanup expired tokens from the cache
+		now := time.Now()
+		for k, v := range cacheFile.Credentials {
+			if now.After(v.Status.ExpirationTimestamp) {
+				delete(cacheFile.Credentials, k)
+			}
+		}
+
+		// write changes back to file
+		if err := f.Truncate(0); err != nil {
+			f.Close()
+			_ = lock.Unlock()
+			util.Fatal(nil, "file truncate failed: %s", err)
+		}
+
+		if _, err := f.Seek(0, 0); err != nil {
+			f.Close()
+			_ = lock.Unlock()
+			util.Fatal(nil, "file seek failed: %s", err)
+		}
+
+		outBytes, err := json.Marshal(cacheFile)
+		if err != nil {
+			f.Close()
+			_ = lock.Unlock()
+			util.Fatal(nil, "json.Marshal() failed: %s", err)
+		}
+
+		if _, err := f.Write(outBytes); err != nil {
+			f.Close()
+			_ = lock.Unlock()
+			util.Fatal(nil, "file write failed: %s", err)
+		}
+
+		f.Close()
+
+		// release lock
+		if err := lock.Unlock(); err != nil {
+			util.Log("failed to unlock file: %s", err)
+		}
 	}
 
 	// print
-	output, err := json.Marshal(cacheFile.Credentials[cacheKey])
+	output, err := json.Marshal(cache)
 	if err != nil {
 		util.Fatal(nil, "json.Marshal() failed: %s", err)
 	}

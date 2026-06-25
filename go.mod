@@ -1,8 +1,13 @@
 module github.com/ryodocx/kube-credential-cache
 
-go 1.19
+go 1.24.0
 
-require k8s.io/client-go v0.29.2
+toolchain go1.24.3
+
+require (
+	github.com/gofrs/flock v0.8.1
+	k8s.io/client-go v0.29.2
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -17,7 +22,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
